@@ -10,3 +10,7 @@
 1. Set "w_gan_training" : True - Train Gan
 2. Set "w_gan_training" : False - Train Autoencoder                  
 
+
+## Comments
+
+May need to create some additional folders for more plots. (Sorry about this, will fix it!)
