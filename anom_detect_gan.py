@@ -5,6 +5,7 @@ import pandas as pd
 import pickle
 import torch
 from bayes_opt import BayesianOptimization
+import json
 #  plotting
 import matplotlib.pyplot as plt
 
@@ -93,14 +94,19 @@ if __name__ == "__main__":
 
     b_ids = [1172, 1219, 1246, 1284, 1272, 1304, 91, 439, 693, 884, 896, 922, 926, 945, 968]
 
+    with open('config.json', 'r') as file:
+        config = json.load(file)
+
+    # select the  iters, window size and file
+    window_size = config['preprocessing']['window_size']
+    iters = config["recon"]["iters"]
+    use_dtw = config["recon"]["use_dtw"]
+
     results_df = pd.DataFrame(
         columns=['b_id', 'use_dtw', 'alpha', 'beta', 'thresh', 'min_height', 'Precision', 'Recall', 'F1'])
     for b_id in b_ids:
         print(b_id)
-        for dtw in [True, False]:
-            # select the  iters (file)
-            window_size = 48
-            iters = 1000
+        for dtw in [use_dtw]:  # also could check [True,False] if both are computed
 
             # Import the test files
             b_df = pd.read_csv(f"dataset/test_df_{b_id}.csv")
@@ -220,3 +226,14 @@ if __name__ == "__main__":
 
                 plt.close()
             """
+
+            TP, FN, FP = evaluate(b_df, error_dict, znorm_dict, window_size, min_height, 24, thresh, alpha, beta)
+            print(TP, FN, FP)
+            P = TP / (TP + FP)
+            R = TP / (TP + FN)
+            F1 = 2 * P * R / (P + R)
+            print(P, R, F1)
+            results_df.loc[len(results_df)] = [b_id, dtw, alpha, beta, thresh, min_height, P, R, F1]  # 'b_id',
+            # 'use_dtw', 'alpha', 'beta', 'thresh', 'min_height', 'Precision', 'Recall', 'F1'
+
+        results_df.to_csv("auto_results_latest24.csv")

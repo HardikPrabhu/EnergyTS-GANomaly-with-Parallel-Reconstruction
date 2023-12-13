@@ -6,14 +6,12 @@ import json
 with open('config.json', 'r') as file:
     config = json.load(file)
 
-
 # open and get all the unique buildings:
 df = pd.read_csv(config["data"]["dataset_path"])
 uni_b = df["building_id"].unique()
 print(f"unique builds : {uni_b}")
 l = len(uni_b)
-i = 1
-
+i = 1  # counter for builds
 
 for b_id in df["building_id"].unique():
     print(b_id)
@@ -28,8 +26,3 @@ for b_id in df["building_id"].unique():
     subprocess.run(["python", "testing.py"])
     print(f"Processed {i}/{l} buildings ......")
     i = i + 1
-
-
-
-
-
