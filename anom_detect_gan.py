@@ -153,7 +153,7 @@ if __name__ == "__main__":
             alpha = optimizer.max["params"]["alpha"]
             beta = optimizer.max["params"]["beta"]
 
-            """
+
             # for plots --
             for i in b_df["s_no"].unique():
                 id_df = b_df[b_df["s_no"] == i]
@@ -193,25 +193,28 @@ if __name__ == "__main__":
                 normalized_array = (array - np.min(array)) / (np.max(array) - np.min(array))
                 meter_reading_line, = plt.plot(x, normalized_array, label='Scaled Meter Reading')
 
-                # Plotting anomalies and peaks
-                anomaly_scatter = plt.scatter([], [], marker='x', color='red', s=500, label='Actual Anomalies')
+                # label handles
                 peak_scatter = plt.scatter([], [], marker='o', color='green', s=200,
                                            label='Detected Anomalies (KDE above min_height)')
+                critical_scatter = plt.scatter([], [], marker='o', color='blue', s=30, label="Critical Points")
+                anomaly_scatter = plt.scatter([], [], marker='X', color='red', s=500, label='Actual Anomalies')
 
                 for j, anomaly in enumerate(id_df["anomaly"]):
                     if anomaly == 1:
-                        plt.scatter(j, 0, marker='x', color='red', s=500)
+                        plt.scatter(j, normalized_array[j], marker='X', color='red', s=500)
 
                 for p in peaks:
-                    plt.scatter(p, 0, marker='o', color='green', s=200)
+                    plt.scatter(p, normalized_array[p], marker='o', color='green', s=200)
+
+
 
                 # Additional markers
                 for p in positions:
-                    plt.scatter(p, 0, marker='o', color='blue', s=10)
+                    plt.scatter(p, normalized_array[p], marker='o', color='blue', s=30)
                 threshold_line = plt.axhline(min_height, color='r', linestyle='--', label='min_height')
 
                 # Adding legends
-                plt.legend(handles=[kde_line, meter_reading_line, anomaly_scatter, peak_scatter, threshold_line],fontsize=font_size)
+                plt.legend(handles=[kde_line, meter_reading_line, anomaly_scatter, peak_scatter, threshold_line, critical_scatter],fontsize=font_size)
 
                 # Making X and Y axes bold
                 plt.xlabel('Time',fontsize=font_size)
@@ -225,9 +228,9 @@ if __name__ == "__main__":
 
 
                 plt.close()
-            """
 
-            TP, FN, FP = evaluate(b_df, error_dict, znorm_dict, window_size, min_height, 24, thresh, alpha, beta)
+
+            TP, FN, FP = evaluate(b_df, error_dict, znorm_dict, window_size, min_height, 12, thresh, alpha, beta)
             print(TP, FN, FP)
             P = TP / (TP + FP)
             R = TP / (TP + FN)

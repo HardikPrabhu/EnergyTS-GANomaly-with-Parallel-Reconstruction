@@ -30,7 +30,7 @@ iters = config["recon"]["iters"]
 use_dtw = config["recon"]["use_dtw"]
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+print(device)
 test_df = pd.read_csv(f"dataset/test_df_{b_id}.csv")
 
 temp = test_df.groupby("s_no")  # group by segments
