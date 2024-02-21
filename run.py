@@ -21,8 +21,8 @@ for b_id in df["building_id"].unique():
     with open('config.json', 'w') as file:
         json.dump(config, file)
 
-    #subprocess.run(["python", "preprocessing.py"])
-    #subprocess.run(["python", "training.py"])
+    subprocess.run(["python", "preprocessing.py"])
+    subprocess.run(["python", "training.py"])
     subprocess.run(["python", "test.py"])
     print(f"Processed {i}/{l} buildings ......")
     i = i + 1
