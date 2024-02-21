@@ -1,5 +1,6 @@
 # Energy-Time-series-anomaly-detection
 
+![True_False_1000_build_884_20.png](True_False_1000_build_884_20.png)
 ## Steps
 1. Set up the appropriate configuration in config.json
 2. Run - run.py (It runs 3 scripts and create reconstruction data pickle files)
