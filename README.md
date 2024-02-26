@@ -16,4 +16,12 @@ Give below is the config file with default values.
 
 ## Comments
 
-May need to create some additional folders for more plots. (Sorry about this, will fix it!)
+Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping and Parallel Reconstruction for Energy Time Series Anomaly Detection" (https://doi.org/10.48550/arXiv.2402.14384) got accepted at the AI4TS WOrkshop @ AAAI 24. 
+
+**Note :** A journal extension of the paper is under development. The repository will be frequently updated. 
+
+
+
+
+
+
