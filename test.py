@@ -12,17 +12,19 @@ with open('config.json', 'r') as file:
 
 # configs
 eval_mode = config["recon"]["use_eval_mode"]
+w_gan_training = config['training']['w_gan_training']
 nz = config['training']['latent_dim']
 window_size = config['preprocessing']['window_size']
-train_type = "wgan"
 iters = config["recon"]["iters"]
 use_dtw = config["recon"]["use_dtw"]
 b_id = "all"
 if config['data']["only_building"] is not None:
     b_id = config['data']["only_building"]
 
+
+
 # model/data import
-netG = torch.load(f'trained_out/{train_type}_netG_{b_id}.pth')
+netG = torch.load(f'trained_out/wgan_netG_{b_id}_{w_gan_training}.pth')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 test_df = pd.read_csv(f"dataset/test_df_{b_id}.csv")
@@ -79,15 +81,15 @@ for id, id_df in temp:
         criterion = SoftDTW(use_cuda=True, gamma=0.1)
     else:
         criterion = torch.nn.MSELoss()
-    if train_type == "wgan":
-        print(X.shape)
-        if eval_mode:
-            netG.eval()  # batch norm in static mode
-        X = torch.tensor(X, device=device).view(X.shape[0], 1, -1)
-        Z, X_, loss = reconstruct(X, iters, netG, criterion, nz)
-        id_out["Z"] = Z
-        id_out["X_"] = X_
-        id_out["recon_loss"] = loss
+
+    print(X.shape)
+    if eval_mode:
+        netG.eval()  # batch norm in static mode
+    X = torch.tensor(X, device=device).view(X.shape[0], 1, -1)
+    Z, X_, loss = reconstruct(X, iters, netG, criterion, nz)
+    id_out["Z"] = Z
+    id_out["X_"] = X_
+    id_out["recon_loss"] = loss
 
     test_out[id] = id_out
 

@@ -2,8 +2,16 @@ import torch
 import json
 import torch.nn as nn
 import random
-from model import ConvDiscriminator, ConvGenerator, Autoencoder
+from model import ConvDiscriminator, ConvGenerator
 import matplotlib.pyplot as plt
+
+"""
+Model Training 
+---------------
+ - Script for training in two modes: a) Simple loss b) WGAN loss. 
+ - Could be switched between the two by setting config['training']['w_gan_training'] = True/False in cofig.json.
+"""
+
 
 # setting up cuda and replication
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -58,7 +66,7 @@ if __name__ == "__main__":
     print(netG)
 
     # Create the Discriminator
-    netD = ConvDiscriminator(window_size)
+    netD = ConvDiscriminator(window_size,w_gan_training)
     netD.to(device)
     # Apply the ``weights_init`` function to randomly initialize all weights
     # like this: ``to mean=0, stdev=0.2``.
@@ -83,7 +91,7 @@ if __name__ == "__main__":
     iters = 0
     # for image generation (while training)
     fixed_noise = torch.normal(0, 1, size=(16, nz, 1), device=device)
-    if config["training"]["w_gan_training"]:
+    if w_gan_training:
         # W-GAN
         print("--WGAN--")
         print("Starting Training Loop...")
@@ -131,48 +139,80 @@ if __name__ == "__main__":
                         a[i][j].plot(fake[i * 4 + j].view(-1))
                         a[i][j].set_xticks(())
                         a[i][j].set_yticks(())
-                plt.savefig('plots/gen_model/wgan_epoch_%d.png' % epoch)
+                plt.savefig(f'plots/gen_model/{b_id}_{w_gan_training}_wgan_epoch_%d.png' % epoch)
+                plt.close()
+    else:
+        print("--GAN--")
+        print("Starting Training Loop...")
+        real_label = 1.
+        fake_label = 0.
+        criterion = nn.BCELoss()
+
+        for epoch in range(num_epochs):
+            for step, data in enumerate(dataloader):
+                real_cpu = data.to(device).float()
+                b_size = real_cpu.size(0)
+
+                # train netD
+                label = torch.full((b_size,), real_label,
+                                   dtype=torch.float, device=device)
+                netD.zero_grad()
+                output = netD(real_cpu).view(-1)
+                errD_real = criterion(output, label)
+                errD_real.backward()
+                D_x = output.mean().item()
+
+                # train netG
+                noise = torch.randn(b_size, nz, 1, device=device)
+                fake = netG(noise)
+                label.fill_(fake_label)
+                output = netD(fake.detach()).view(-1)
+                errD_fake = criterion(output, label)
+                errD_fake.backward()
+                D_G_z1 = output.mean().item()
+                errD = errD_real + errD_fake
+                optimizerD.step()
+                netG.zero_grad()
+
+                label.fill_(real_label)
+                output = netD(fake).view(-1)
+                errG = criterion(output, label)
+                errG.backward()
+                D_G_z2 = output.mean().item()
+                optimizerG.step()
+
+                print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
+                      % (epoch, num_epochs, step, len(dataloader),
+                         errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+                G_losses.append(errG.item())
+                D_losses.append(errD.item())
+            # save training progress ...
+            with torch.no_grad():
+                fake = netG(fixed_noise).detach().cpu()
+                f, a = plt.subplots(4, 4, figsize=(8, 8))
+                for i in range(4):
+                    for j in range(4):
+                        a[i][j].plot(fake[i * 4 + j].view(-1))
+                        a[i][j].set_xticks(())
+                        a[i][j].set_yticks(())
+                plt.savefig(f'plots/gen_model/{w_gan_training}_wgan_epoch_%d.png' % epoch)
                 plt.close()
 
-        # training plot
-        plt.figure(figsize=(10, 5))
-        plt.title("Generator and Discriminator Loss During Training")
-        plt.plot(G_losses, label="G")
-        plt.plot(D_losses, label="D")
-        plt.xlabel("iterations")
-        plt.ylabel("Loss")
-        plt.legend()
 
-        # Saving the plot to a file
-        plt.savefig(f'trained_out/loss_plot_{b_id}.png')
 
-        # save trained model
-        torch.save(netD, f'trained_out/wgan_netD_{b_id}.pth')
-        torch.save(netG, f'trained_out/wgan_netG_{b_id}.pth')
+    # training plot
+    plt.figure(figsize=(10, 5))
+    plt.title("Generator and Discriminator Loss During Training")
+    plt.plot(G_losses, label="Generator Loss")
+    plt.plot(D_losses, label="Discriminator Loss")
+    plt.xlabel("iterations")
+    plt.ylabel("Loss")
+    plt.legend()
 
-    else:
+    # Saving the plot to a file
+    plt.savefig(f'trained_out/loss_plot_{b_id}_{w_gan_training}.png')
 
-        # Autoencoder Training : for comparison
-        autoencoder = Autoencoder(nz,window_size)
-        if torch.cuda.is_available():
-            autoencoder.cuda()
-        criterion = nn.MSELoss()
-        optimizer = torch.optim.Adam(autoencoder.parameters(), lr=0.001)
-        for epoch in range(num_epochs):
-            for data in dataloader:
-                # If using GPU
-                if torch.cuda.is_available():
-                    data = data.cuda().float()
+    # save trained model
+    torch.save(netD, f'trained_out/wgan_netD_{b_id}_{w_gan_training}.pth')
+    torch.save(netG, f'trained_out/wgan_netG_{b_id}_{w_gan_training}.pth')
 
-                # Forward pass
-                output = autoencoder(data)
-                loss = criterion(output, data)
-
-                # Backward and optimize
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-
-            print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}')
-
-        torch.save(autoencoder, f'trained_out/autoencoder_{b_id}.pth')

@@ -10,6 +10,7 @@
 ## Configs
 
 Give below is the config file with default values.
+
 ```yaml
 {"data": {"dataset_path": "dataset/15_builds_dataset.csv", "train_path": "model_input/", "only_building": 1304}, "training": {"batch_size": 128, "num_epochs": 200, "latent_dim": 100, "w_gan_training": true, "n_critic": 5, "clip_value": 0.01, "betaG": 0.5, "betaD": 0.5, "lrG": 0.0002, "lrD": 0.0002}, "preprocessing": {"normalize": true, "plot_segments": true, "store_segments": true, "window_size": 48}, "recon": {"use_dtw": true, "iters": 1000, "use_eval_mode": true}}
 ```
@@ -21,7 +22,16 @@ Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping
 **Note :** A journal extension of the paper is under development. The repository will be frequently updated. 
 
 
+## Useful Resources
 
+[1] 1D-DCGAN : https://github.com/LixiangHan/GANs-for-1D-Signal
 
+[2] soft-dtw loss cuda : https://github.com/Maghoumi/pytorch-softdtw-cuda
 
+[3] TanoGan : https://github.com/mdabashar/TAnoGAN
 
+[4] MadGan : https://github.com/Guillem96/madgan-pytorch
+
+[5] TadGan : https://github.com/arunppsg/TadGAN
+
+[6] LEAD Dataset : https://github.com/samy101/lead-dataset

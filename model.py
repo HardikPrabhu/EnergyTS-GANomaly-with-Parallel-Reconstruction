@@ -8,13 +8,15 @@ Architecture: Generator and Discriminator with 1-D conv layers. 3 symmetrical hi
 Parameters:
          window_size : size of the subsequence (int)
          nz : size of the latent dimension (int)
+         wgan_train : Choice for Discriminator based on training (bool) 
 """
 
 
 class ConvDiscriminator(nn.Module):
-    def __init__(self, window_size):
+    def __init__(self, window_size,wgan_train=True):
+        self.wgan_train = wgan_train
         super().__init__()
-        self.main = nn.Sequential(
+        layers = [
             nn.Conv1d(1, 64, kernel_size=4, stride=2, padding=1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
 
@@ -22,13 +24,17 @@ class ConvDiscriminator(nn.Module):
             nn.BatchNorm1d(128),
             nn.LeakyReLU(0.2, inplace=True),
 
-            nn.Conv1d(128, 256, kernel_size=4,
-                      stride=2, padding=1, bias=False),
+            nn.Conv1d(128, 256, kernel_size=4, stride=2, padding=1, bias=False),
             nn.BatchNorm1d(256),
             nn.LeakyReLU(0.2, inplace=True),
-            nn.Conv1d(256, 1, kernel_size=int(window_size / (2 ** 3)),
-                      stride=2, padding=0, bias=False)
-        )
+
+            nn.Conv1d(256, 1, kernel_size=int(window_size / (2 ** 3)), stride=2, padding=0, bias=False)
+        ]
+
+        if not wgan_train:
+            layers.append(nn.Sigmoid())
+
+        self.main = nn.Sequential(*layers)
 
     def forward(self, x, y=None):
         x = self.main(x)

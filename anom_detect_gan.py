@@ -6,9 +6,6 @@ import pickle
 import torch
 from bayes_opt import BayesianOptimization
 import json
-#  plotting
-import matplotlib.pyplot as plt
-
 
 def get_measures(actual, pred, tol):
     """
