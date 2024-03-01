@@ -92,7 +92,8 @@ if __name__ == "__main__":
     iters = config["recon"]["iters"]
     use_dtw = config["recon"]["use_dtw"]
     eval_mode = config["recon"]["use_eval_mode"]
-    lat_dim = 100
+    lat_dim = config['training']['latent_dim']
+    tol = 12
     results_df = pd.DataFrame(
         columns=['b_id', 'use_dtw', 'alpha', 'beta', 'thresh', 'min_height', 'Precision', 'Recall', 'F1'])
     for b_id in b_ids:
@@ -137,7 +138,7 @@ if __name__ == "__main__":
             alpha = optimizer.max["params"]["alpha"]
             beta = optimizer.max["params"]["beta"]
 
-            tol = 12
+
             TP, FN, FP = evaluate(b_df, test_out_dict, window_size, min_height, tol, thresh, alpha, beta)
             print(TP, FN, FP)
             P = TP / (TP + FP)
@@ -147,4 +148,14 @@ if __name__ == "__main__":
             results_df.loc[len(results_df)] = [b_id, dtw, alpha, beta, thresh, min_height, P, R, F1]  # 'b_id',
             # 'use_dtw', 'alpha', 'beta', 'thresh', 'min_height', 'Precision', 'Recall', 'F1'
 
-        results_df.to_csv(f"auto_results_latest_{tol}_{eval_mode}_{use_dtw}.csv")
+    if eval_mode:
+        t1 = "eval_mode_on"
+    else:
+        t1 = "eval_mode_off"
+
+    if use_dtw:
+        t2 = "soft_dtw"
+    else:
+        t2 = "mse"
+
+    results_df.to_csv(f"results_{tol}_{t1}_{t2}.csv")
