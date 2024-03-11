@@ -23,6 +23,9 @@ torch.use_deterministic_algorithms(True)
 
 
 def weights_init(m):
+    """
+    A function to initialize model weights
+    """
     classname = m.__class__.__name__
     if classname.find('Conv1D') != -1:
         nn.init.normal_(m.weight.data, 0.0, 0.02)

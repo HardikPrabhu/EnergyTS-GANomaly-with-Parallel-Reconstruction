@@ -6,7 +6,9 @@ import torch
 
 
 def impute_nulls(data):
-    # mean for all the buildings is used for imputing (This could be improved later)
+    """
+    imputation: mean for all the buildings is used for imputing (This could be improved later).
+    """
     mean_reading = data.groupby('building_id').mean()['meter_reading']
     building_id = mean_reading.index
     values = mean_reading.values
@@ -17,10 +19,16 @@ def impute_nulls(data):
 
 
 def preprocess_data(data, dropna=True):
+    """
+    Preprocessing: for now dropping missing value is used.
+    Users could add more preprocessing steps.
+    """
     data = data.sort_values(by="timestamp")
     print(f'unique buildings : {data["building_id"].unique()}')
     if dropna:
         data.dropna(subset=['meter_reading'], inplace=True)
+    else:
+        data = impute_nulls(data)
     return data
 
 
@@ -32,6 +40,11 @@ def segment_data(data, n_segments=25, normalize=True):
     data: pandas dataframe
     Dataset with columns "building_id","anomaly" and "meter reading"
 
+    n_segments: int
+    Number of segments in which the timeseries data for each building  should be divided.
+
+    normalize: bool
+    If true, each segment is normalize to lie in the range [-1,1]
     """
     min_seg_len = len(data)
     temp = data.groupby("building_id")
