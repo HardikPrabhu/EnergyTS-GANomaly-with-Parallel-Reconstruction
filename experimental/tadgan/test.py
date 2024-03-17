@@ -6,6 +6,26 @@ import pickle
 import json
 from torch.autograd import Variable
 import torch.nn.init as init
+from scipy import stats
+
+def dtw_reconstruction_error(x, x_):
+    n, m = x.shape[0], x_.shape[0]
+    dtw_matrix = np.zeros((n+1, m+1))
+    for i in range(n+1):
+        for j in range(m+1):
+            dtw_matrix[i, j] = np.inf
+    dtw_matrix[0, 0] = 0
+
+    for i in range(1, n+1):
+        for j in range(1, m+1):
+            cost = abs(x[i-1] - x_[j-1])
+            # take last min from a square box
+            last_min = np.min([dtw_matrix[i-1, j], dtw_matrix[i, j-1], dtw_matrix[i-1, j-1]])
+            dtw_matrix[i, j] = cost + last_min
+    return dtw_matrix[n][m]
+
+
+
 
 prefix = "../../"
 with open(prefix + 'config.json', 'r') as file:
@@ -19,30 +39,18 @@ b_id = "all"
 if config['data']["only_building"] is not None:
     b_id = config['data']["only_building"]
 
-
-
 # model/data import
-generator = torch.load(f'gan_netG_{b_id}.pth')
-discriminator = torch.load(f'gan_netD_{b_id}.pth')
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
+encoder_path = f'encoder_{b_id}.pth'
+decoder_path = f'decoder_{b_id}.pth'
+critic_x_path = f'critic_x_{b_id}.pth'
+critic_z_path = f'critic_z_{b_id}.pth'
+encoder =  torch.load(encoder_path)
+decoder =  torch.load(decoder_path)
+critic_x = torch.load(critic_x_path)
+critic_z = torch.load(critic_z_path)
+
 test_df = pd.read_csv(f"test_df_{b_id}.csv")
 train_df = pd.read_csv(f"train_df_{b_id}.csv")
-
-
-def Anomaly_score(x, G_z, Lambda=0.1):
-    residual_loss = torch.sum(torch.abs(x - G_z))  # Residual Loss
-
-    # x_feature is a rich intermediate feature representation for real data x
-    output, x_feature = discriminator(x.to(device))
-    # G_z_feature is a rich intermediate feature representation for fake data G(z)
-    output, G_z_feature = discriminator(G_z.to(device))
-
-    discrimination_loss = torch.sum(torch.abs(x_feature - G_z_feature))  # Discrimination loss
-
-    total_loss = (1 - Lambda) * residual_loss.to(device) + Lambda * discrimination_loss
-    return total_loss
-
 
 # testing
 temp = test_df.groupby("s_no")  # group by segments
@@ -87,39 +95,23 @@ for id, id_df in temp:
     # each segment will have subsequences of overlapping windows:
     X = split_sequence(segment, window_size)
     id_out["X"] = X
-    Anom_X = split_sequence(id_df["anomaly"], window_size)
-    Isanom = Anom_X.sum(axis=1)
-    id_out["labels"] = Isanom
     # reconstruct & errors
     loss_list = []
-    X_ = []
-    Z = []
+    X = torch.tensor(X)
+    reconstructed_signal = decoder(encoder(X))
+    reconstructed_signal = torch.squeeze(reconstructed_signal)
+    critic_loss_list = torch.squeeze(critic_x(X)).detach().numpy()
+    # X_ is directly obtained
+    X_ = reconstructed_signal
     for i, x in enumerate(X):
-        x = torch.tensor(x,device=device).view(1,window_size,1).float()
-        print(x.shape)
-        z = Variable(init.normal(torch.zeros(1,
-                                             window_size,
-                                             1), mean=0, std=0.1), requires_grad=True)
-        z_optimizer = torch.optim.Adam([z], lr=1e-2)
-
-        loss = None
-        for j in range(iters):  # set your interation range
-            x_, _ = generator(z.cuda())
-            loss = Anomaly_score(Variable(x).cuda(), x_)
-            loss.backward()
-            z_optimizer.step()
-            X_.append(x_)
-            Z.append(z)
-        # optimized z, now get corresponding loss, X' and store
-
-        loss_list.append(loss)  # Store the loss from the final iteration
+        x_ = X_[i].detach().numpy()
+        # calculate dtw-loss*critic_score as final recon loss which will be considered for anom detect.
+        loss = dtw_reconstruction_error(x, x_)
+        loss_list.append(loss)
         print('~~~~~~~~loss={} ~~~~~~~~~~'.format(loss))
-
-
-    id_out["Z"] = Z
-    id_out["X_"] = X_
-    id_out["recon_loss"] = loss_list
-
+    loss_list = stats.zscore(loss_list)
+    critic_loss_list = stats.zscore(critic_loss_list)
+    id_out["recon_loss"] = loss_list*critic_loss_list
     test_out[id] = id_out
 
 # Store the dict as pickle
