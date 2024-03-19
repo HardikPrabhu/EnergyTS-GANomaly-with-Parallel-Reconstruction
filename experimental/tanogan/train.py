@@ -43,7 +43,8 @@ if __name__ == "__main__":
     w_gan_training = False  # False always
     batch_size = config['training']['batch_size']
 
-    in_dim =1
+    in_dim = 1
+
 
     class ArgsTrn:
         workers = 4
@@ -61,7 +62,7 @@ if __name__ == "__main__":
         b_id = config['data']["only_building"]  # 1 building at a time (recommended)
 
     # Create the generator
-    netG = LSTMGenerator(1, 1,device=device)
+    netG = LSTMGenerator(1, 1, device=device)
     netG.to(device)
     # Apply the ``weights_init`` function to randomly initialize all weights
     #  to ``mean=0``, ``stdev=0.02``.
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     print(netG)
 
     # Create the Discriminator
-    netD = LSTMDiscriminator(1,device=device)
+    netD = LSTMDiscriminator(1, device=device)
     netD.to(device)
     # Apply the ``weights_init`` function to randomly initialize all weights
     # like this: ``to mean=0, stdev=0.2``.
@@ -109,7 +110,7 @@ if __name__ == "__main__":
             # (1) Update D network: maximize log(D(x)) + log(1 - D(G(z)))
             ###########################
             # Train with real data
-            x = x.view(-1,window_size,1).float()
+            x = x.view(-1, window_size, 1).float()  # convert  to (batch_size, seq_len, in_dim)
             netD.zero_grad()
             real = x.to(device)
             batch_size, seq_len = real.size(0), real.size(1)
@@ -149,8 +150,6 @@ if __name__ == "__main__":
         print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f D(x): %.4f D(G(z)): %.4f / %.4f'
               % (epoch, opt_trn.epochs, i, len(dataloader),
                  errD.item(), errG.item(), D_x, D_G_z1, D_G_z2), end='')
-
-
 
     # save trained model
     torch.save(netD, f'gan_netD_{b_id}.pth')
