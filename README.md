@@ -6,6 +6,10 @@ Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping
 
 
 ![True_False_1000_build_884_20.png](True_False_1000_build_884_20.png)
+
+[View Poster PDF](poster.pdf)
+
+
 ## Steps
 1. Set up the appropriate configuration in config.json
 2. Run - run.py (It runs 3 scripts and create reconstruction data pickle files)
@@ -27,13 +31,13 @@ The directory "experimental" contains code for comparisons with other popular Ga
 
 It includes the following implementations:
 
-[1] TAnoGAN
+[1] TAnoGAN - Use gradient descent in the noise space, to get appropriate noise for reconstruction.
 
-[2] TADGAN
+[2] TADGAN - Train an encoder with cycle consistency, in order to map back to the noise space for reconstruction. 
 
-[3] 1-D CNN Autoencoder
+[3] 1-D CNN Autoencoder - Use the reconstruction error obtained by encoding-decoding as anomaly score.
 
-[4] DEGAN
+[4] DEGAN - Use the output of the discriminator to directly as a score. 
 
 
 
