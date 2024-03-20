@@ -2,6 +2,12 @@ import pandas as pd
 import subprocess
 import json
 
+
+
+
+
+
+
 # To perform all the operations (-one model per building)
 prefix = "../../"
 with open(prefix + 'config.json', 'r') as file:
