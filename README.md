@@ -37,7 +37,7 @@ It includes the following implementations:
 
 [3] 1-D CNN Autoencoder - Use the reconstruction error obtained by encoding-decoding as anomaly score.
 
-[4] DEGAN - Use the output of the discriminator to directly as a score. 
+[4] DEGAN - Use the output of the discriminator (1- D(x)) directly as a score. 
 
 
 
