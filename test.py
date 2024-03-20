@@ -21,8 +21,6 @@ b_id = "all"
 if config['data']["only_building"] is not None:
     b_id = config['data']["only_building"]
 
-
-
 # model/data import
 netG = torch.load(f'trained_out/wgan_netG_{b_id}_{w_gan_training}.pth')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -48,28 +46,28 @@ for id, id_df in temp:
     # add window length from segment before in front (if available)
     before_id = id - 1
     if before_id in test_seg_ids:
-        b = test_df[test_df["s_no"] == before_id]["meter_reading"][-window_size//2:]
+        b = test_df[test_df["s_no"] == before_id]["meter_reading"][-window_size // 2:]
         segment = np.concatenate([b, segment])
         id_out["window_b_included"] = True
 
     if before_id in train_seg_ids:
-        b = train_df[train_df["s_no"] == before_id]["meter_reading"][-window_size//2:]
+        b = train_df[train_df["s_no"] == before_id]["meter_reading"][-window_size // 2:]
         segment = np.concatenate([b, segment])
         id_out["window_b_included"] = True
 
     # add window length from segment after at back (if available)
     after_id = id + 1
     if after_id in test_seg_ids:
-        a = test_df[test_df["s_no"] == after_id]["meter_reading"][:window_size//2]
+        a = test_df[test_df["s_no"] == after_id]["meter_reading"][:window_size // 2]
         segment = np.concatenate([segment, a])
         id_out["window_a_included"] = True
 
     if after_id in train_seg_ids:
-        a = train_df[train_df["s_no"] == after_id]["meter_reading"][:window_size//2]
+        a = train_df[train_df["s_no"] == after_id]["meter_reading"][:window_size // 2]
         segment = np.concatenate([segment, a])
         id_out["window_a_included"] = True
 
-    print("diff in length :", len(id_df) - len(segment), ( id_out["window_b_included"],id_out["window_a_included"]))
+    print("diff in length :", len(id_df) - len(segment), (id_out["window_b_included"], id_out["window_a_included"]))
     # each segment will have subsequences of overlapping windows:
     X = split_sequence(segment, window_size)
     id_out["X"] = X
