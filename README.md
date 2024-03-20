@@ -1,5 +1,10 @@
 # Energy-Time-series-anomaly-detection
 
+Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping and Parallel Reconstruction for Energy Time Series Anomaly Detection" (https://doi.org/10.48550/arXiv.2402.14384) got accepted at the AI4TS Workshop @ AAAI 24. 
+
+**Note :** A journal extension of the paper is under development. The repository will be frequently updated. 
+
+
 ![True_False_1000_build_884_20.png](True_False_1000_build_884_20.png)
 ## Steps
 1. Set up the appropriate configuration in config.json
@@ -12,16 +17,24 @@
 Give below is the config file with default values.
 
 ```yaml
-{"data": {"dataset_path": "dataset/15_builds_dataset.csv", "train_path": "model_input/", "only_building": 1304}, "training": {"batch_size": 128, "num_epochs": 200, "latent_dim": 100, "w_gan_training": true, "n_critic": 5, "clip_value": 0.01, "betaG": 0.5, "betaD": 0.5, "lrG": 0.0002, "lrD": 0.0002}, "preprocessing": {"normalize": true, "plot_segments": true, "store_segments": true, "window_size": 48}, "recon": {"use_dtw": true, "iters": 1000, "use_eval_mode": true}}```
+{"data": {"dataset_path": "dataset/15_builds_dataset.csv", "train_path": "model_input/", "only_building": 1304}, "training": {"batch_size": 128, "num_epochs": 200, "latent_dim": 100, "w_gan_training": true, "n_critic": 5, "clip_value": 0.01, "betaG": 0.5, "betaD": 0.5, "lrG": 0.0002, "lrD": 0.0002}, "preprocessing": {"normalize": true, "plot_segments": true, "store_segments": true, "window_size": 48}, "recon": {"use_dtw": true, "iters": 1000, "use_eval_mode": true}}
 ```
 
-## Comments
+## Other Methodologies
 
-Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping and Parallel Reconstruction for Energy Time Series Anomaly Detection" (https://doi.org/10.48550/arXiv.2402.14384) got accepted at the AI4TS Workshop @ AAAI 24. 
-
-**Note :** A journal extension of the paper is under development. The repository will be frequently updated. 
 
 The directory "experimental" contains code for comparisons with other popular Gan based methods. We perform anomaly detection using different methodologies and also try to maintain similar evaluation and training hyper-parameters for fair comparisons.
+
+It includes the following implementations:
+
+[1] TAnoGAN
+
+[2] TADGAN
+
+[3] 1-D CNN Autoencoder
+
+[4] DEGAN
+
 
 
 ## Useful Resources
