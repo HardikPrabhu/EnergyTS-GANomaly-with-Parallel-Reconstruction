@@ -46,7 +46,7 @@ for b_id in df["building_id"].unique():
     # Change configs
     config["data"]["only_building"] = int(b_id)
 
-    with open('config.json', 'w') as file:
+    with open(prefix + 'config.json', 'w') as file:
         json.dump(config, file)
 
     start_time = time.time()
