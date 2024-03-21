@@ -83,8 +83,6 @@ def evaluate(test_df, test_out_dict,window_size, min_height, tol=24, thresh=0.5,
 
 if __name__ == "__main__":
 
-    b_ids = [1172, 1219, 1246, 1284, 1272, 1304, 91, 439, 693, 884, 896, 922, 926, 945, 968]
-    #b_ids = [1304]
     with open('config.json', 'r') as file:
         config = json.load(file)
 
@@ -96,6 +94,15 @@ if __name__ == "__main__":
     lat_dim = config['training']['latent_dim']
 
     tolerance = [12, 24]  # the tolerance values for which evaluation is required.
+
+
+    # get the building ids
+    df = pd.read_csv(config["data"]["dataset_path"])
+    b_ids = df["building_id"].unique()
+    del df
+    print(f"unique builds : {b_ids}")
+
+    # b_ids = [1304] # or pass a custom list
 
     results_df = pd.DataFrame(
         columns=['b_id', 'use_dtw', 'alpha', 'beta', 'thresh', 'min_height', 'Precision', 'Recall', 'F1','tol'])

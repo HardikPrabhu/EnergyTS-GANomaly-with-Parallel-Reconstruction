@@ -86,8 +86,6 @@ def evaluate(test_df, test_out_dict,window_size, min_height, tol=24, thresh=0.5,
 
 if __name__ == "__main__":
 
-    b_ids = [1172, 1219, 1246, 1284, 1272, 1304, 91, 439, 693, 884, 896, 922, 926, 945, 968]
-    #b_ids = [1304]
     prefix = "../../"
     with open(prefix+ 'config.json', 'r') as file:
         config = json.load(file)
@@ -95,9 +93,19 @@ if __name__ == "__main__":
     window_size = config['preprocessing']['window_size']
     iters = config["recon"]["iters"]
     lat_dim = config['training']['latent_dim']
-    tol = 12
+    tolerance = [12, 24]  # the tolerance values for which evaluation is required.
+
+    # get the building ids
+    df = pd.read_csv(prefix + config["data"]["dataset_path"])
+    b_ids = df["building_id"].unique()
+    del df
+    print(f"unique builds : {b_ids}")
+
+    # b_ids = [1304] # or pass a custom list
+
     results_df = pd.DataFrame(
-        columns=['b_id', 'alpha','thresh', 'min_height', 'Precision', 'Recall', 'F1'])
+        columns=['b_id', 'alpha','thresh', 'min_height', 'Precision', 'Recall', 'F1','tol'])
+
     for b_id in b_ids:
             print(b_id)
             # Import the test files
@@ -137,13 +145,13 @@ if __name__ == "__main__":
             min_height = optimizer.max["params"]["min_height"]
             alpha = optimizer.max["params"]["alpha"]
 
-            TP, FN, FP = evaluate(b_df, test_out_dict, window_size, min_height, tol, thresh, alpha, 0)
-            print(TP, FN, FP)
-            P = TP / (TP + FP)
-            R = TP / (TP + FN)
-            F1 = 2 * P * R / (P + R)
-            print(P, R, F1)
-            results_df.loc[len(results_df)] = [b_id, alpha, thresh, min_height, P, R, F1]  # 'b_id',
-            # 'use_dtw', 'alpha', 'beta', 'thresh', 'min_height', 'Precision', 'Recall', 'F1'
+            for tol in tolerance:
+                TP, FN, FP = evaluate(b_df, test_out_dict, window_size, min_height, tol, thresh, alpha, 0)
+                print(TP, FN, FP)
+                P = TP / (TP + FP)
+                R = TP / (TP + FN)
+                F1 = 2 * P * R / (P + R)
+                print(P, R, F1)
+                results_df.loc[len(results_df)] = [b_id, alpha, thresh, min_height, P, R, F1,tol]
 
-    results_df.to_csv(f"results_{tol}.csv")
+    results_df.to_csv(f"results.csv")
