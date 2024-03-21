@@ -2,7 +2,7 @@ import pandas as pd
 import subprocess
 import json
 import time
-
+import sys
 # To perform all the operations (-one model per building)
 prefix = "../../"
 with open(prefix + 'config.json', 'r') as file:
@@ -24,19 +24,19 @@ for b_id in df["building_id"].unique():
         json.dump(config, file)
 
     start_time = time.time()
-    subprocess.run(["python", "preprocessing.py"])
+    subprocess.run([sys.executable, "preprocessing.py"])
     end_time = time.time()
     pre_time = end_time - start_time
     print(f"Building {b_id} :: Time taken for preprocessing : {pre_time}")
 
     starting_time = time.time()
-    subprocess.run(["python", "train.py"])
+    subprocess.run([sys.executable, "train.py"])
     end_time = time.time()
     train_time = end_time - starting_time
     print(f"Building {b_id} :: Time taken for training : {train_time}")
 
     start_time = time.time()
-    subprocess.run(["python", "test.py"])
+    subprocess.run([sys.executable, "test.py"])
     end_time = time.time()
     test_time = end_time - start_time
     print(f"Building {b_id} :: Time taken for test : {test_time}")
