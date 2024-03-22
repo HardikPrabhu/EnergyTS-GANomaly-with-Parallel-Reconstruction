@@ -109,7 +109,7 @@ if __name__ == "__main__":
             print(b_id)
             # Import the test files
             b_df = pd.read_csv(f"test_df_{b_id}.csv")
-            with open(f"iters_{iters}_reconstruction_{b_id}.pkl", "rb") as f:
+            with open(f"reconstruction_{b_id}.pkl", "rb") as f:
                 test_out_dict = pickle.load(f)
 
             # optimize the params:-
