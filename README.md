@@ -2,10 +2,9 @@
 
 Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping and Parallel Reconstruction for Energy Time Series Anomaly Detection" (https://doi.org/10.48550/arXiv.2402.14384) got accepted at the AI4TS Workshop @ AAAI 24. 
 
-**Note :** A journal extension of the paper is under development. The repository will be frequently updated. 
+**Note :** A journal extension of the paper is under development. The repository will be frequently updated.
 
-
-![True_True_1000_build_977_10.png](True_False_1000_build_884_20.png)
+![True_True_1000_build_977_10.png](True_True_1000_build_977_10.png)
 
 [View Poster PDF](poster.pdf)
 
