@@ -5,7 +5,7 @@ Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping
 **Note :** A journal extension of the paper is under development. The repository will be frequently updated. 
 
 
-![True_False_1000_build_884_20.png](True_False_1000_build_884_20.png)
+![True_True_1000_build_977_10.png](True_False_1000_build_884_20.png)
 
 [View Poster PDF](poster.pdf)
 
@@ -48,7 +48,7 @@ Give below is the config file with default values.
     "recon": {
         "use_dtw": true,
         "iters": 1000,
-        "use_eval_mode": false
+        "use_eval_mode": true
     }
 }
 ```

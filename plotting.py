@@ -5,6 +5,11 @@ import pickle
 import torch
 import json
 import matplotlib.pyplot as plt
+import seaborn as sns
+import matplotlib.patches as mpatches
+import matplotlib.dates as mdates
+
+custom_params = {"axes.spines.right": True, "axes.spines.top": True}
 
 
 """
@@ -25,9 +30,9 @@ lat_dim = 100
 tol = 12
 
 # open the results to get eval params
-results_df = pd.read_csv(f"auto_results_latest_{tol}_{eval_mode}_{use_dtw}.csv")
+results_df = pd.read_csv(f"results_eval_mode_on_soft_dtw.csv")
 
-b_ids = [1172, 1219, 1246, 1284, 1272, 1304, 91, 439, 693, 884, 896, 922, 926, 945, 968]
+b_ids = [1272, 977,1219,889,884, 886, 147,931] # select buildings to plot ...
 
 for b_id in b_ids:
     print(b_id)
@@ -38,10 +43,10 @@ for b_id in b_ids:
         with open(f"test_out/iters_{iters}_reconstruction_{b_id}_{dtw}_{eval_mode}.pkl", "rb") as f:
             test_out_dict = pickle.load(f)
     # for plots --
-    alpha = float(results_df[results_df["b_id"] == b_id]["alpha"])
-    beta = float(results_df[results_df["b_id"] == b_id]["beta"])
-    thresh = float(results_df[results_df["b_id"] == b_id]["thresh"])
-    min_height = float(results_df[results_df["b_id"] == b_id]["min_height"])
+    alpha = float(results_df[results_df["b_id"] == b_id]["alpha"].iloc[0])
+    beta = float(results_df[results_df["b_id"] == b_id]["beta"].iloc[0])
+    thresh = float(results_df[results_df["b_id"] == b_id]["thresh"].iloc[0])
+    min_height = float(results_df[results_df["b_id"] == b_id]["min_height"].iloc[0])
     for i in b_df["s_no"].unique():
         id_df = b_df[b_df["s_no"] == i]
         id_dict = test_out_dict[i]
@@ -70,45 +75,83 @@ for b_id in b_ids:
             if len(positions) == 1:
                 y[positions[0]] = 1
                 peaks = positions
-        font_size = 18
+
+
+        font_size = 20
         plt.figure(figsize=(30, 8))
-        kde_line, = plt.plot(x, y, label='KDE')
+        sns.set_style("ticks")
+
+        # Set the Seaborn style and color palette
+
+        kde_line, = plt.plot(x, y, label='KDE', linewidth=2)
+
         array = id_df["meter_reading"]
         normalized_array = (array - np.min(array)) / (np.max(array) - np.min(array))
-        meter_reading_line, = plt.plot(x, normalized_array, label='Scaled Meter Reading')
+
 
         # label handles
-        peak_scatter = plt.scatter([], [], marker='o', color='green', s=200,
-                                   label='Detected Anomalies (KDE above min_height)')
-        critical_scatter = plt.scatter([], [], marker='o', color='green', alpha=0.3, s=30, label="Critical Points")
-        anomaly_scatter = plt.scatter([], [], marker='X', color='red', s=500, label='Actual Anomalies')
+        critical_scatter = plt.scatter([], [], marker='o', color='green', alpha=0.85, s=50, label="Critical Points")
 
-        for j, anomaly in enumerate(id_df["anomaly"]):
-            if anomaly == 1:
-                plt.scatter(j, normalized_array[j], marker='X', color='red', s=500)
 
-        for p in peaks:
-            if p < len(normalized_array):
-                plt.scatter(p, normalized_array[p], marker='o', color='green', s=200)
+        apeaks = np.where(id_df["anomaly"]>0)[0]
 
-        # Additional markers
+        # Draw shaded region for actual anomalies
+        start_positions = []
+        end_positions = []
+        for i in range(len(apeaks)):
+            if i == 0 or apeaks[i] - apeaks[i - 1] > 1:
+                start_positions.append(apeaks[i])
+            if i == len(apeaks) - 1 or apeaks[i + 1] - apeaks[i] > 1:
+                end_positions.append(apeaks[i])
+
+        # Draw shaded rectangles for consecutive anomalies
+        for start, end in zip(start_positions, end_positions):
+            if end - start > 0:
+                plt.axvspan(start - 0.5, end + 0.5, alpha=0.2, color='red')
+            else:
+                plt.axvspan(start - 0.5, start + 0.5, alpha=0.2, color='red')
+
+
+        meter_reading_line, = plt.plot(x, normalized_array, label='Scaled Meter Reading', linewidth=3.5)
+
+        # Draw shaded rectangles for predicted anomalous regions
+        start_positions = []
+        end_positions = []
+        for i in range(len(peaks)):
+            if i == 0 or peaks[i] - peaks[i - 1] > 1:
+                start_positions.append(peaks[i])
+            if i == len(peaks) - 1 or peaks[i + 1] - peaks[i] > 1:
+                end_positions.append(peaks[i])
+
+        # Draw shaded rectangles for consecutive anomalies
+        for start, end in zip(start_positions, end_positions):
+            if end - start > 0:
+                plt.axvspan(start - 0.5, end + 0.5, alpha=0.12, color='green')
+            else:
+                plt.axvspan(start - 0.5, start + 0.5, alpha=0.12, color='green')
+
+        # Plot critical points
         for p in positions:
             if p < len(normalized_array):
-                plt.scatter(p, normalized_array[p], marker='o', color='green', alpha=0.3, s=30)
-        threshold_line = plt.axhline(min_height, color='r', linestyle='--', label='min_height')
+                plt.scatter(p, 0, marker='o', color='green', alpha=0.85, s=50)
 
+        threshold_line = plt.axhline(min_height, color='r', linestyle='--', label='min_height', linewidth=2)
+
+        shaded_patch = mpatches.Patch(color='green', alpha=0.12, label='Predicted Anomalies')
+        shaded_patch_r = mpatches.Patch(color='red', alpha=0.2, label='Actual Anomalies')
         # Adding legends
-        plt.legend(handles=[kde_line, meter_reading_line, anomaly_scatter, peak_scatter, threshold_line, critical_scatter],
+        plt.legend(handles=[kde_line, meter_reading_line, threshold_line, critical_scatter,shaded_patch,shaded_patch_r],
                    fontsize=font_size)
 
-        # Making X and Y axes bold
-        plt.xlabel('Time', fontsize=font_size)
+        plt.xlabel('Timestamp', fontsize=font_size)
         plt.ylabel('Scaled Reading', fontsize=font_size)
-
-        plt.xticks(fontsize=font_size)
         plt.yticks(fontsize=font_size)
 
-        plt.savefig(f'plots/anom_detect/{dtw}_{eval_mode}_{iters}_build_{b_id}_{i}.png',
-                    dpi=300)  # Save each segment separately
+        plt.xticks(fontsize=font_size)
+        num_ticks = 7  # Number of timestamps to display
+        tick_indices = np.linspace(0, len(id_df) - 1, num_ticks, dtype=int)
+        tick_labels = id_df["timestamp"][tick_indices]
+        plt.xticks(ticks=tick_indices, labels=tick_labels)
 
+        plt.savefig(f'plots/anom_detect/{dtw}_{eval_mode}_{iters}_build_{b_id}_{i}.png', dpi=300)
         plt.close()
