@@ -10,10 +10,25 @@ import time
 
 def get_measures(actual, pred, tol):
     """
-  actual : actual labels (pointwise)
-  pred :   predicted labels (pointwise)
-  tol :    tolerence
-  """
+      A function to measure, the total True Positives, False Negatives and False Positives for a given tolerence.
+      Parameters
+      --------------
+      actual : a 1-d array
+         Actual labels (1 or 0 entries)
+      pred : a 1-d array of same size of actual
+         Predicted labels (predicted labels)
+      tol : int
+         tolerance value used for calculation
+
+      Returns
+      ---------------
+      TP: int
+        Total true positives count
+      FN: int
+         Total false negatives count
+      FP: int
+         Total false positives count
+    """
     TP = 0
     FN = 0
     FP = 0
@@ -37,6 +52,26 @@ def get_measures(actual, pred, tol):
 # Evaluation function
 def evaluate(test_df, test_out_dict,window_size, min_height, tol=24, thresh=0.5, alpha=1, beta=0,
              only_peaks=False):
+    """
+    A function to evaluate the f1 scores on the test dataset.
+    Parameters
+    -----------
+      test_df: pandas dataframe
+        The dataset obtained for testing (processed and includes "s_no" column.
+      test_out_dict: Dictionary
+          Dictionary containing reconstruction details with s_no (segment number) as keys.
+      window_size:
+          size of the subsequence (number of datapoints)
+      min_height: float in range (o,1)
+         Setting threshold on the KDE curve
+      thresh: float
+        threshold on the reconstruction error to identify critical subsequences.
+      alpha, beta: floats
+         anomaly score params
+      only_peaks: bool
+        If true only the peaks in the region of KDE above min-height are marked as anomalous timestamps
+        else, all the timestamps in those regions are marked as anomalies.
+    """
     # error dict contains {s_no : [errors ]}
     TP = 0
     FN = 0
@@ -119,6 +154,7 @@ if __name__ == "__main__":
             # optimize the params:-
 
             def black_box_function(thresh, min_height, alpha, beta):
+                "define the blackbox function to maximize with parameters as the variables to optimize"
                 TP, FN, FP = evaluate(b_df, test_out_dict, window_size, min_height, 6, thresh, alpha, beta)
                 print(TP, FN, FP)
                 try:
