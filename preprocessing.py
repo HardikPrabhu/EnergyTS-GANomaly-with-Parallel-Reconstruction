@@ -7,7 +7,15 @@ import torch
 
 def impute_nulls(data):
     """
-    imputation: mean for all the buildings is used for imputing (This could be improved later).
+    Mean for all the buildings is used for imputing (This could be improved later).
+    Parameter
+    ---------
+      data: pandas dataframe
+       A dataset containing columns: ['building_id','meter_reading'].
+    Returns
+    --------
+      data: pandas dataframe
+        A dataframe with missing meter readings imputed.
     """
     mean_reading = data.groupby('building_id').mean()['meter_reading']
     building_id = mean_reading.index
@@ -20,8 +28,20 @@ def impute_nulls(data):
 
 def preprocess_data(data, dropna=True):
     """
-    Preprocessing: for now dropping missing value is used.
+    Preprocessing the input dataframe. By default dropping missing value is used.
     Users could add more preprocessing steps.
+    Parameters
+    ------------
+       data: pandas dataframe
+         A dataset containing columns: ['building_id','meter_reading',"timestamp"].
+       dropna: bool
+        If true, missing meter readings are simply removed, else missing meter readings are imputed
+        using the method "impute_nulls".
+    Returns
+    -----------
+       data: pandas dataframe
+         A preprocessed dataset ready for further processing.
+
     """
     data = data.sort_values(by="timestamp")
     print(f'unique buildings : {data["building_id"].unique()}')
@@ -34,17 +54,29 @@ def preprocess_data(data, dropna=True):
 
 def segment_data(data, n_segments=25, normalize=True):
     """
-    A function which will divide the datasets in anomlous and normal segments. (train/test)
-    parameters:
-    ---------
-    data: pandas dataframe
-    Dataset with columns "building_id","anomaly" and "meter reading"
+    A function which will divide the datasets in anomalous and normal segments. (train/test)
+    Parameters
+    -------------
+        data: pandas dataframe
+          Dataset with columns "building_id","anomaly" and "meter reading"
+          Each timestamp is annotated with 1/0 for being an anomaly/normal timestamp and stored in the column anomaly.
+        n_segments: int
+          Number of segments in which the timeseries data for each building  should be divided.
+        normalize: bool
+        If true, each segment is normalize to lie in the range [-1,1]
+    Returns
+    ------------
+        Processed pandas dataframes with additional column "s_no".
+        Indicating the segment that a particular entry belongs to.
 
-    n_segments: int
-    Number of segments in which the timeseries data for each building  should be divided.
-
-    normalize: bool
-    If true, each segment is normalize to lie in the range [-1,1]
+        normal_df: pandas dataframe
+          The dataset with no anomalies which is used for training.
+        ano_df : pandas dataframe
+          The dataset with segments which contains at least one anomalous timestamp.
+        s_no : int
+          Returns the total number of segments in the dataset.
+        min_seg_len: int
+          The number of datapoints (timestamps) contained in the smallest segment.
     """
     min_seg_len = len(data)
     temp = data.groupby("building_id")
@@ -77,7 +109,24 @@ def segment_data(data, n_segments=25, normalize=True):
 
 
 def split_sequence(sequence, n_steps, centering=False, minmax=False):
-    """A function which will create the inputs for the models"""
+    """
+    A function which will create the inputs for the models by passing a sliding window with 1 step size.
+    Parameters
+    -------------
+        sequence: 1-D array
+           Typically the entire meter readings from a segment in chronological order.
+        n_steps: int
+           Widow size for creating a subsequence
+        centering: bool
+           if true then standard normalization is applied to each subsequence.
+        minmax: bool
+           if true min-max scaling is done on the subsequence so that each reading
+           within the subsequence is between the range of [-1,1].
+   Returns
+   -----------
+        X: numpy array
+           A 2-D array with each row as a subsequence.
+    """
     X = list()
     for i in range(len(sequence)):
         # find the end of this pattern
@@ -112,7 +161,7 @@ if __name__ == "__main__":
         config = json.load(file)
 
     window_size = config['preprocessing']['window_size']
-    b_id = "all"
+    b_id = "all" # default value, all the buildings in the dataset are taken together.
 
     # train-test segments
     data = pd.read_csv(f"{config['data']['dataset_path']}")
