@@ -8,6 +8,45 @@ Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping
 
 [View Poster PDF](poster.pdf)
 
+## LEAD Dataset
+
+This study uses the LEAD 1.0 dataset. This public dataset includes hourly-based electricity meter readings for commercial buildings over up to one year. The dataset consists of year-long hourly electricity meter readings with anomaly annotations from 200 buildings and is open-sourced in this GitHub repository [6]. Each building contains about 8,747 data points. Anomaly annotations are provided, marking anomalous points (timestamps) within each building's time series.
+
+This dataset contains hourly electricity meter readings and anomaly annotations for various commercial buildings over a period of up to one year. The data is structured as follows:
+
+- `building_id`: Unique identifier for each building.
+- `timestamp`: Hourly timestamp of the meter reading.
+- `meter_reading`: Actual electricity meter reading value.
+- `anomaly`: Binary indicator of whether the timestamp (reading) is considered anomalous (1) or not (0).
+
+The dataset covers readings from 200 buildings, with each building having approximately 8,747 data points. Anomaly annotations are provided to mark specific timestamps within each building's time series where anomalous readings were detected.
+
+Here's a small example of the dataset:
+
+| building_id | timestamp       | meter_reading | anomaly |
+|-------------|-----------------|---------------|---------|
+| 1           | 01-01-2016 00:00| 100.5         | 0       |
+| 1           | 01-01-2016 01:00| 98.2          | 0       |
+| 1           | 01-01-2016 02:00| 95.7          | 0       |
+| 2           | 01-01-2016 00:00| 200.1         | 0       |
+| 2           | 01-01-2016 01:00| 203.4         | 1       |
+| 2           | 01-01-2016 02:00| 197.8         | 0       |
+
+
+## Getting started 
+
+1. Clone the repository:
+  ```bash
+  git clone https://github.com/HardikPrabhu/Energy-Time-Series-Anomaly-Detection.git
+  ```
+2. Navigate to the cloned repository.
+3. Install the required python packages using pip:
+
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+
 
 ## Steps
 1. Set up the appropriate configuration in config.json
