@@ -84,12 +84,70 @@ Here's a small example of the dataset:
 }
 ```
 
+## Anomaly detection on a single building
 
-## Steps
-1. Set up the appropriate configuration in config.json
-2. Run - run.py (It runs 3 scripts and create reconstruction data pickle files)
-3. Run - anom_detect_gan.py  (It also has bayes opt to tune the params)
-4. Run - plotting.py to create plots for the anomaly detection
+### Building Selection and Preprocessing
+
+* Insert the building id of the desired building in the config file.
+
+​```python
+config["data"]["only_building"] = 1304
+​```
+
+* Adjust the preprocessing settings in the config file. For example, change the `window_size` of the subsequences.
+
+* Run the `preprocessing.py` Python script. It will divide the building data into segments. The training segments would not contain any anomaly. 
+The model input tensors of the training segments will be created in the `model_input` directory.
+
+### Training the GAN Model
+
+* First, adjust the training settings in the config file. The GAN model can be trained in two modes:
+ - WGAN training
+ - Simple training (vanilla)
+
+* Set the `w_gan_training` option to `False` for simple training and `True` for WGAN training.
+
+​```python
+config["training"]["w_gan_training"] = True
+​```
+
+* After adjusting the training settings in the config file, run the `training.py` script. It will create the model files in the `trained_out` directory.
+* Both the generator and the discriminator are stored separately. Only the generator would be used for reconstruction.
+
+### Reconstruction of the Test Subsequences
+
+* Adjust the reconstruction settings in the config file.
+* Two options are provided as reconstruction losses:
+  * Soft-DTW
+  * MSE
+
+* Set the `use_dtw` option to `False` for MSE and `True` for soft-DTW loss.
+
+​```python
+config["recon"]["use_dtw"] = True
+​```
+
+* Run the `testing.py` script. It will create the reconstruction data pickle files in the `test_out` directory. 
+
+### Anomaly Detection 
+
+* Only the reconstruction data pickle file is required for the final step. 
+* Run the `anom_detect_gan.py` script.
+* Note: Uncomment Line 105 and pass the list of specific buildings to be evaluated, else all the available buildings will be evaluated. 
+* Bayesian optimization is used to adjust the evaluation hyper-parameters.
+* A results CSV is created in the working directory.
+
+## Anomaly Detection on the Entire Dataset
+
+Anomaly detection process for the entire set of 200 buildings follow the same steps. Each building gets its own GAN model. The process is automated by the `run.py` script where the reconstruction pickle files are obtained for each building by running the `preprocessing.py`, `training.py` and `testing.py` scripts on loop.
+
+1. Set up the appropriate configuration in `config.json`
+2. Run `run.py` (It runs 3 scripts and creates reconstruction data pickle files)
+3. Run `anom_detect_gan.py` 
+4. Run `plotting.py` to create plots for the anomaly detection
+
+
+
 
 
 ## Other Methodologies
