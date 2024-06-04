@@ -46,17 +46,10 @@ Here's a small example of the dataset:
   pip install -r requirements.txt
   ```
 
+4. Adjust the experiment settings:
 
-
-## Steps
-1. Set up the appropriate configuration in config.json
-2. Run - run.py (It runs 3 scripts and create reconstruction data pickle files)
-3. Run - anom_detect_gan.py  (It also has bayes opt to tune the params)
-4. Run - plotting.py to create plots for the anomaly detection
-
-## Configs
-
-Give below is the config file with default values.
+  Modify the config.json file to configure the experiment according to your requirements. This [JSON config file](config.json) allows you to customize various parameters and settings for your experiments.
+  Given below is the config file with default values.
 
 ```yaml
 {
@@ -90,6 +83,14 @@ Give below is the config file with default values.
     }
 }
 ```
+
+
+## Steps
+1. Set up the appropriate configuration in config.json
+2. Run - run.py (It runs 3 scripts and create reconstruction data pickle files)
+3. Run - anom_detect_gan.py  (It also has bayes opt to tune the params)
+4. Run - plotting.py to create plots for the anomaly detection
+
 
 ## Other Methodologies
 
