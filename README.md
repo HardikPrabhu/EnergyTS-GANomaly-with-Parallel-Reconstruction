@@ -2,7 +2,7 @@
 
 Our related paper "Generative Adversarial Network with Soft-Dynamic Time Warping and Parallel Reconstruction for Energy Time Series Anomaly Detection" (https://doi.org/10.48550/arXiv.2402.14384) got accepted at the AI4TS Workshop @ AAAI 24. 
 
-**Note :** A journal extension of the paper is under development. The repository will be frequently updated.
+**Note:** A journal extension of the paper is under development. The repository will be frequently updated.
 
 ![True_True_1000_build_977_10.png](True_True_1000_build_977_10.png)
 
@@ -49,7 +49,10 @@ Here's a small example of the dataset:
 4. Adjust the experiment settings:
 
   Modify the config.json file to configure the experiment according to your requirements. This [JSON config file](config.json) allows you to customize various parameters and settings for your experiments.
-  Given below is the config file with default values.
+
+## Config JSON File Details
+
+Given below is the config file with default values.
 
 ```yaml
 {
@@ -83,6 +86,34 @@ Here's a small example of the dataset:
     }
 }
 ```
+
+
+### Data Section
+- `dataset_path`: Path to the dataset file (`"dataset/15_builds_dataset.csv"`)
+- `train_path`: Path where the training data or model inputs are stored (`"model_input/"`)
+- `only_building`: Particular building identifier or index (`1304`)
+
+### Training Section
+- `batch_size`: Number of samples per batch during the training process (`128`)
+- `num_epochs`: Number of training epochs (`200`)
+- `latent_dim`: Dimensionality of the latent space in the model (`100`)
+- `w_gan_training`: Indicates whether to use Wasserstein GAN (WGAN) training (`true`)
+- `n_critic`: Number of critic iterations per generator iteration in WGAN training (`5`)
+- `clip_value`: Clipping value for the critic's weights in WGAN training (`0.01`)
+- `betaG` and `betaD`: Beta values for the generator and discriminator, respectively (`0.5`)
+- `lrG` and `lrD`: Learning rates for the generator and discriminator, respectively (`0.0002`)
+
+### Preprocessing Section
+- `normalize`: Indicates whether to normalize the sements (transform all the readings in a segment to be in the [-1,1] range). (`true`)
+- `plot_segments`: Specifies whether to plot the segments (`true`)
+- `store_segments`: Indicates whether to store the segments (`true`)
+- `window_size`: Size of the window for data preprocessing (`48`)
+
+### Reconstruction (recon) Section
+- `use_dtw`: Indicates whether to use Soft-Dynamic Time Warping (Soft-DTW) for reconstruction (`true`)
+- `iters`: Number of iterations  used by the gradient descent algorithm in noise space for rconstruction (`1000`)
+- `use_eval_mode`: Indicates whether to use evaluation mode of the Generator is used during reconstruction (`true`)
+
 
 ## Anomaly detection on a single building
 
