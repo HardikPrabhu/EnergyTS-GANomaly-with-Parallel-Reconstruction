@@ -98,7 +98,7 @@ Given below is the config file with default values.
 - `num_epochs`: Number of training epochs (`200`)
 - `latent_dim`: Dimensionality of the latent space in the model (`100`)
 - `w_gan_training`: Indicates whether to use Wasserstein GAN (WGAN) training (`true`)
-- `n_critic`: Number of critic iterations per generator iteration in WGAN training (`5`)
+- `n_critic`: Number of critic (discriminator) iterations per generator iteration in WGAN training (`5`)
 - `clip_value`: Clipping value for the critic's weights in WGAN training (`0.01`)
 - `betaG` and `betaD`: Beta values for the generator and discriminator, respectively (`0.5`)
 - `lrG` and `lrD`: Learning rates for the generator and discriminator, respectively (`0.0002`)
