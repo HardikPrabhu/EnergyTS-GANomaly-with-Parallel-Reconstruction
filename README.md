@@ -181,21 +181,171 @@ Anomaly detection process for the entire set of 200 buildings follow the same st
 
 
 
-## Other Methodologies
+## Baseline Methodologies
 
 
-The directory "experimental" contains code for comparisons with other popular Gan based methods. We perform anomaly detection using different methodologies and also try to maintain similar evaluation and training hyper-parameters for fair comparisons.
+The directory "experimental" contains code for comparisons with other popular methods. We perform anomaly detection using different methodologies and also try to maintain similar evaluation and training hyper-parameters for fair comparisons.
 
 It includes the following implementations:
 
-[1] TAnoGAN - Use gradient descent in the noise space, to get appropriate noise for reconstruction.
+* TAnoGAN - Use gradient descent in the noise space, to get appropriate noise for reconstruction.
 
-[2] TADGAN - Train an encoder with cycle consistency, in order to map back to the noise space for reconstruction. 
+* TADGAN - Train an encoder with cycle consistency, in order to map back to the noise space for reconstruction. 
 
-[3] 1-D CNN Autoencoder - Use the reconstruction error obtained by encoding-decoding as anomaly score.
+* 1-D CNN Autoencoder - Use the reconstruction error obtained by encoding-decoding as anomaly score.
 
-[4] DEGAN - Use the output of the discriminator (1- D(x)) directly as a score. 
+* DEGAN - Use the output of the discriminator (1- D(x)) directly as a score. 
 
+* seq-LOF: Local outlier factor method by considering the subsequences as single datapoints of window size dimensions followed by our methodology to convert 
+critical subsequences to anomalous timestamps.
+
+## Benchmarking Results
+
+Our model with different configurations and other baseline models are tested on a large dataset of 200 buildings. The average metrics are shown in the table below.
+
+![img.png](img.png)
+
+### Configurations for our models
+
+1. DCGAN-soft-DTW_SSM:
+
+```yaml
+{
+    "data": {
+        "dataset_path": "dataset/200_buildings_dataset.csv",
+        "train_path": "model_input/",
+        "only_building": 1304
+    },
+    "training": {
+        "batch_size": 128,
+        "num_epochs": 200,
+        "latent_dim": 100,
+        "w_gan_training": true,
+        "n_critic": 5,
+        "clip_value": 0.01,
+        "betaG": 0.5,
+        "betaD": 0.5,
+        "lrG": 0.0002,
+        "lrD": 0.0002
+    },
+    "preprocessing": {
+        "normalize": true,
+        "plot_segments": true,
+        "store_segments": true,
+        "window_size": 48
+    },
+    "recon": {
+        "use_dtw": true,
+        "iters": 1000,
+        "use_eval_mode": true
+    }
+}
+```
+
+2. DCGAN_MSE_SSM:
+
+```yaml
+{
+    "data": {
+        "dataset_path": "dataset/200_buildings_dataset.csv",
+        "train_path": "model_input/",
+        "only_building": 1304
+    },
+    "training": {
+        "batch_size": 128,
+        "num_epochs": 200,
+        "latent_dim": 100,
+        "w_gan_training": true,
+        "n_critic": 5,
+        "clip_value": 0.01,
+        "betaG": 0.5,
+        "betaD": 0.5,
+        "lrG": 0.0002,
+        "lrD": 0.0002
+    },
+    "preprocessing": {
+        "normalize": true,
+        "plot_segments": true,
+        "store_segments": true,
+        "window_size": 48
+    },
+    "recon": {
+        "use_dtw": false,
+        "iters": 1000,
+        "use_eval_mode": true
+    }
+}
+```
+
+3. DCGAN-soft-DTW_ASM:
+
+```yaml
+{
+    "data": {
+        "dataset_path": "dataset/200_buildings_dataset.csv",
+        "train_path": "model_input/",
+        "only_building": 1304
+    },
+    "training": {
+        "batch_size": 128,
+        "num_epochs": 200,
+        "latent_dim": 100,
+        "w_gan_training": true,
+        "n_critic": 5,
+        "clip_value": 0.01,
+        "betaG": 0.5,
+        "betaD": 0.5,
+        "lrG": 0.0002,
+        "lrD": 0.0002
+    },
+    "preprocessing": {
+        "normalize": true,
+        "plot_segments": true,
+        "store_segments": true,
+        "window_size": 48
+    },
+    "recon": {
+        "use_dtw": true,
+        "iters": 1000,
+        "use_eval_mode": false
+    }
+}
+```
+
+4. DCGAN-MSE_ASM:
+
+```yaml
+{
+    "data": {
+        "dataset_path": "dataset/200_buildings_dataset.csv",
+        "train_path": "model_input/",
+        "only_building": 1304
+    },
+    "training": {
+        "batch_size": 128,
+        "num_epochs": 200,
+        "latent_dim": 100,
+        "w_gan_training": true,
+        "n_critic": 5,
+        "clip_value": 0.01,
+        "betaG": 0.5,
+        "betaD": 0.5,
+        "lrG": 0.0002,
+        "lrD": 0.0002
+    },
+    "preprocessing": {
+        "normalize": true,
+        "plot_segments": true,
+        "store_segments": true,
+        "window_size": 48
+    },
+    "recon": {
+        "use_dtw": false,
+        "iters": 1000,
+        "use_eval_mode": false
+    }
+}
+```
 
 
 ## Useful Resources
