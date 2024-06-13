@@ -42,6 +42,11 @@ Here's a small example of the dataset:
 2. Navigate to the cloned repository.
 3. Install the required python packages using pip:
 
+  * First install torch with cuda support.
+  ```bash
+  pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
+  ```
+  * Then install other requirements.
   ```bash
   pip install -r requirements.txt
   ```
